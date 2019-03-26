@@ -1,4 +1,4 @@
-package fused_effects
+package fused_effects.abstraction
 import mwords._
 
 
