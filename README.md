@@ -10,7 +10,7 @@ This project is of exploratory nature, and is not meant to be published globally
 
 To install *locally* with `sbt`, execute:
 
-bash```
+```
     git clone https://github.com/marcinzh/fused-effects-dotty.git
     cd fused-effects-dotty
     sbt publishLocal
