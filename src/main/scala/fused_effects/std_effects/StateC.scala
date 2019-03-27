@@ -11,13 +11,6 @@ implied StateC_Monad[M[_] : Monad, S] for Monad[[A] => StateC[S, M, A]] {
 
   def pure[A](a: A): F[A] = StateC(s => Monad[M].pure((s, a)))
 
-  def (fa: F[A]) map[A, B](f: A => B): F[B] =
-    StateC { s0 =>
-      fa.run(s0).map {
-        case (s1, a) => (s1, f(a))
-      }
-    }
-
   def (fa: F[A]) flatMap[A, B](f: A => F[B]): F[B] =
     StateC { s0 =>
       fa.run(s0).flatMap {
