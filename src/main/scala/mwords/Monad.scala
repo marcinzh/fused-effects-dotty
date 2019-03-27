@@ -5,6 +5,8 @@ trait Functor[F[_]] {
   final type ThisFunctor = F
 
   def (fa: F[A]) map[A, B](f: A => B): F[B]
+
+  def (fa: F[A]) mapConst[A, B](b: B): F[B] = fa.map(_ => b)
 }
 
 object Functor {
