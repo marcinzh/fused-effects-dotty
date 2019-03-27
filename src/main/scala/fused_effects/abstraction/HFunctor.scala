@@ -12,3 +12,7 @@ trait HFunctor[H[_[_], _]] {
 object HFunctor {
   def apply[H[_[_], _]] given (ev: HFunctor[H]) = ev
 }
+
+
+def (h: H[F, F[A]]) handlePure[H[_[_], _] : HFunctor, F[_], G[_], A](ff: F ~> G): H[G, G[A]] =
+  h.fmap(ff(_)).hmap(ff)

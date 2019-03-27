@@ -11,6 +11,19 @@ trait Functor[F[_]] {
 
 object Functor {
   def apply[F[_]] given (ev: Functor[F]) = ev
+
+  implied Pair_Functor[S] for Functor[[X] => (S, X)] {
+    private type F = ThisFunctor
+    def (fa: F[A]) map[A, B](f: A => B): F[B] = (fa._1, f(fa._2))
+  }
+
+  implied Either_Functor[E] for Functor[[X] => Either[E, X]] {
+    private type F = ThisFunctor
+    def (fa: F[A]) map[A, B](f: A => B): F[B] = fa match {
+      case Right(a) => Right(f(a))
+      case Left(e) => Left(e)
+    }
+  }
 }
 
 
