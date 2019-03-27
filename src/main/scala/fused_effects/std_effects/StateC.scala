@@ -20,7 +20,7 @@ implied StateC_Monad[M[_] : Monad, S] for Monad[[A] => StateC[S, M, A]] {
 }
 
 
-implied StateC_Carrier[H0[_[_], _], M0[_], S] given (otherCarrier: Carrier[H0, M0], otherEffect: Effect[H0]) for Carrier[
+implied StateC_Carrier[H0[_[_], _] : Effect, M0[_], S] given (otherCarrier: Carrier[H0, M0]) for Carrier[
   ([M[_], A] => State[S, M, A]) :+: H0,
   [A] => StateC[S, M0, A]
 ] {
@@ -42,7 +42,7 @@ implied StateC_Carrier[H0[_[_], _], M0[_], S] given (otherCarrier: Carrier[H0, M
             carr.run(s)
           }
         }
-        val h0 = otherEffect.handle(other)((s0, ()), ff)
+        val h0 = the[Effect[H0]].handle(other)((s0, ()), ff)
         otherCarrier.eff(h0)
       }
   }
