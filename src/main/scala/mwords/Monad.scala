@@ -17,6 +17,8 @@ trait Monad[F[_]] extends Functor[F] {
 
   def pure[A](a: A): F[A]
   def (fa: F[A]) flatMap[A, B](f: A => F[B]): F[B]
+
+  def (fa: F[A]) default_map[A, B](f: A => B): F[B] = fa.flatMap(a => pure(f(a)))
 }
 
 object Monad {

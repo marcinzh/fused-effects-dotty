@@ -4,7 +4,6 @@ import mwords._
 
 
 sealed trait State[S, M[_], A]
-case class Get[S, M[_], A](wtf : S => A) extends State[S, M, A]
-case class Put[S, M[_], A](s : S, wtf : A) extends State[S, M, A]
+case class Get[S, M[_], A](wtf: S => A) extends State[S, M, A]
+case class Put[S, M[_], A](s: S, wtf: A) extends State[S, M, A]
 
-case class StateC[S, M[_], A](run : S => M[(S, A)])
