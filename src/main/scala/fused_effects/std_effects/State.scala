@@ -37,15 +37,15 @@ implied State_Effect[S] for Effect[[M[_], A] => State[S, M, A]] {
 
 
 def get[H[_[_], _], M[_], S] given (evM: Member[State.Ap1[S], H], evC: Carrier[H, M]): M[S] =
-  send[State.Ap1[S], H, M, S](Get(evC.require_Monad.pure(_)))
+  send[State.Ap1[S], H, M, S](Get(evC.theMonad.pure(_)))
 
 def gets[H[_[_], _], M[_], S, A](f: S => A) given (evM: Member[State.Ap1[S], H], evC: Carrier[H, M]): M[A] =
-  send[State.Ap1[S], H, M, A](Get(s => evC.require_Monad.pure(f(s))))
+  send[State.Ap1[S], H, M, A](Get(s => evC.theMonad.pure(f(s))))
 
 def put[H[_[_], _], M[_], S](s: S) given (evM: Member[State.Ap1[S], H], evC: Carrier[H, M]): M[Unit] =
-  send[State.Ap1[S], H, M, Unit](Put(s, evC.require_Monad.pure(())))
+  send[State.Ap1[S], H, M, Unit](Put(s, evC.theMonad.pure(())))
 
 def modify[H[_[_], _], M[_], S](f: S => S) given (evM: Member[State.Ap1[S], H], evC: Carrier[H, M]): M[Unit] = {
-  import evC.require_Monad
+  import evC.theMonad
   get.flatMap(s => put(f(s)))
 }

@@ -25,10 +25,10 @@ implied Error_Carrier[H0[_[_], _] : Effect, M0[_], E] given (otherCarrier: Carri
 ] {
   private type H = ThisH
   private type M = ThisM
-  // import otherCarrier.{require_HFunctor => otherHFunctor}
-  import otherCarrier.{require_Monad => otherMonad}
-  implicit def require_HFunctor: HFunctor[ThisH] = the[HFunctor[ThisH]]
-  implicit def require_Monad: Monad[ThisM] = the[Monad[ThisM]]
+  // import otherCarrier.{theHFunctor => otherHFunctor}
+  import otherCarrier.{theMonad => otherMonad}
+  implicit def theHFunctor: HFunctor[ThisH] = the[HFunctor[ThisH]]
+  implicit def theMonad: Monad[ThisM] = the[Monad[ThisM]]
 
   def eff[A](h: H[M, M[A]]): M[A] = h match {
     case Sum.L(Throw(wtf)) => ErrorC(Monad[M0].pure(Left(wtf)))

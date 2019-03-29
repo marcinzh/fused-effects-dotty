@@ -21,10 +21,10 @@ implied Reader_Carrier[H0[_[_], _], M0[_], E] given (otherCarrier: Carrier[H0, M
 ] {
   private type H = ThisH
   private type M = ThisM
-  import otherCarrier.{require_HFunctor => otherHFunctor}
+  import otherCarrier.{theHFunctor => otherHFunctor}
   // import otherCarrier.{requireMonad => otherMonad}
-  implicit def require_HFunctor: HFunctor[ThisH] = the[HFunctor[ThisH]]
-  implicit def require_Monad: Monad[ThisM] = the[Monad[ThisM]]
+  implicit def theHFunctor: HFunctor[ThisH] = the[HFunctor[ThisH]]
+  implicit def theMonad: Monad[ThisM] = the[Monad[ThisM]]
 
   def eff[A](h: H[M, M[A]]): M[A] = h match {
     case Sum.L(Ask(wtf)) => ReaderC(e => wtf(e).run(e))

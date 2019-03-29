@@ -7,8 +7,8 @@ import mwords._
 trait Carrier[H[_[_], _], M[_]] {
   type ThisH = H
   type ThisM = M
-  implicit def require_HFunctor: HFunctor[H]
-  implicit def require_Monad: Monad[M]
+  implicit def theHFunctor: HFunctor[H]
+  implicit def theMonad: Monad[M]
 
   def eff[A](wtf: H[M, M[A]]): M[A]
 }
