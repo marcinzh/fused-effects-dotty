@@ -13,6 +13,18 @@ object Reader {
 }
 
 
+def ask[H[_[_], _], M[_], E] given (evM: Member[Reader.Ap1[E], H], evC: Carrier[H, M]): M[E] =
+  send[Reader.Ap1[E]](Ask(evC.theMonad.pure(_)))
+
+def local[H[_[_], _], M[_], E, A](f: E => E, scope: M[A]) given (evM: Member[Reader.Ap1[E], H], evC: Carrier[H, M]): M[A] =
+  send[Reader.Ap1[E]](Local(f, scope, evC.theMonad.pure(_)))
+
+def asks[H[_[_], _], M[_], E, A](f: E => A) given (evM: Member[Reader.Ap1[E], H], evC: Carrier[H, M]): M[A] = {
+  import evC.theMonad
+  ask.map(f)
+}
+
+
 implied Reader_Effect[E] for Effect[Reader.Ap1[E]] {
   private type H = ThisEffect
 
@@ -36,16 +48,4 @@ implied Reader_Effect[E] for Effect[Reader.Ap1[E]] {
       val wtf2 = (fb: F[tB]) => ff(fb.map(wtf))
       Local(mod, scope2, wtf2)
   }
-}
-
-
-def ask[H[_[_], _], M[_], E] given (evM: Member[Reader.Ap1[E], H], evC: Carrier[H, M]): M[E] =
-  send[Reader.Ap1[E]](Ask(evC.theMonad.pure(_)))
-
-def local[H[_[_], _], M[_], E, A](f: E => E, scope: M[A]) given (evM: Member[Reader.Ap1[E], H], evC: Carrier[H, M]): M[A] =
-  send[Reader.Ap1[E]](Local(f, scope, evC.theMonad.pure(_)))
-
-def asks[H[_[_], _], M[_], E, A](f: E => A) given (evM: Member[Reader.Ap1[E], H], evC: Carrier[H, M]): M[A] = {
-  import evC.theMonad
-  ask.map(f)
 }

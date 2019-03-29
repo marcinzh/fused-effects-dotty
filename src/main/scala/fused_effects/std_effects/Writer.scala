@@ -14,6 +14,19 @@ object Writer {
 }
 
 
+def tell[H[_[_], _], M[_], W](w: W) given (evM: Member[Writer.Ap1[W], H], evC: Carrier[H, M]): M[Unit] =
+  send[Writer.Ap1[W]](Tell(w, evC.theMonad.pure(())))
+
+def listen[H[_[_], _], M[_], W, A](scope: M[A]) given (evM: Member[Writer.Ap1[W], H], evC: Carrier[H, M]): M[(W, A)] =
+  send[Writer.Ap1[W]](Listen(scope, w => a => evC.theMonad.pure((w, a))))
+
+def listens[H[_[_], _], M[_], W, A, B](f: W => B)(scope: M[A]) given (evM: Member[Writer.Ap1[W], H], evC: Carrier[H, M]): M[(B, A)] =
+  send[Writer.Ap1[W]](Listen(scope, w => a => evC.theMonad.pure((f(w), a))))
+
+def censor[H[_[_], _], M[_], W, A](f: W => W)(scope: M[A]) given (evM: Member[Writer.Ap1[W], H], evC: Carrier[H, M]): M[A] =
+  send[Writer.Ap1[W]](Censor(f, scope, evC.theMonad.pure(_)))
+
+
 implied Writer_Effect[W] for Effect[[M[_], A] => Writer[W, M, A]] {
   private type H = ThisHFunctor
 
@@ -44,15 +57,3 @@ implied Writer_Effect[W] for Effect[[M[_], A] => Writer[W, M, A]] {
       Censor(mod, scope2, wtf2)
   }
 }
-
-def tell[H[_[_], _], M[_], W](w: W) given (evM: Member[Writer.Ap1[W], H], evC: Carrier[H, M]): M[Unit] =
-  send[Writer.Ap1[W]](Tell(w, evC.theMonad.pure(())))
-
-def listen[H[_[_], _], M[_], W, A](scope: M[A]) given (evM: Member[Writer.Ap1[W], H], evC: Carrier[H, M]): M[(W, A)] =
-  send[Writer.Ap1[W]](Listen(scope, w => a => evC.theMonad.pure((w, a))))
-
-def listens[H[_[_], _], M[_], W, A, B](f: W => B)(scope: M[A]) given (evM: Member[Writer.Ap1[W], H], evC: Carrier[H, M]): M[(B, A)] =
-  send[Writer.Ap1[W]](Listen(scope, w => a => evC.theMonad.pure((f(w), a))))
-
-def censor[H[_[_], _], M[_], W, A](f: W => W)(scope: M[A]) given (evM: Member[Writer.Ap1[W], H], evC: Carrier[H, M]): M[A] =
-  send[Writer.Ap1[W]](Censor(f, scope, evC.theMonad.pure(_)))
