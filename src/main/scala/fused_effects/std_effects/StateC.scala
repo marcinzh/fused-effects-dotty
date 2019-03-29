@@ -5,8 +5,13 @@ import mwords._
 
 case class StateC[S, M[_], A](run: S => M[(S, A)])
 
+object StateC {
+  type Ap1[S] = [M[_], A] => StateC[S, M, A]
+  type Ap2[S, M[_]] = [A] => StateC[S, M, A]
+}
 
-implied StateC_Monad[M[_] : Monad, S] for Monad[[A] => StateC[S, M, A]] {
+
+implied StateC_Monad[M[_] : Monad, S] for Monad[StateC.Ap2[S, M]] {
   private type F = ThisMonad
 
   def pure[A](a: A): F[A] = StateC(s => Monad[M].pure((s, a)))
@@ -21,8 +26,8 @@ implied StateC_Monad[M[_] : Monad, S] for Monad[[A] => StateC[S, M, A]] {
 
 
 implied StateC_Carrier[H0[_[_], _] : Effect, M0[_], S] given (otherCarrier: Carrier[H0, M0]) for Carrier[
-  ([M[_], A] => State[S, M, A]) :+: H0,
-  [A] => StateC[S, M0, A]
+  State.Ap1[S] :+: H0,
+  StateC.Ap2[S, M0]
 ] {
   private type H = ThisH
   private type M = ThisM
