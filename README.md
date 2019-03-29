@@ -4,6 +4,8 @@ An attempt to translate [fused-effects](https://github.com/fused-effects/fused-e
 
 Requires Dotty compiler.
 
+:construction: :construction: :warning: Work in progress :warning: :construction: :construction:
+
 # Installation
 
 This project is of exploratory nature, and is not meant to be published globally. 
