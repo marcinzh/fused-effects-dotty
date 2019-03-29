@@ -8,6 +8,11 @@ case class Tell[W, M[_], A](stuff: W, wtf: A) extends Writer[W, M, A]
 case class Listen[W, M[_], A, B](scope: M[B], wtf: W => B => A) extends Writer[W, M, A]
 case class Censor[W, M[_], A, B](mod: W => W, scope: M[B], wtf: B => A) extends Writer[W, M, A]
 
+object Writer {
+  type Ap1[W] = [M[_], A] => Writer[W, M, A]
+  type Ap2[W, M[_]] = [A] => Writer[W, M, A]
+}
+
 
 implied Writer_Effect[W] for Effect[[M[_], A] => Writer[W, M, A]] {
   private type H = ThisHFunctor
@@ -39,3 +44,15 @@ implied Writer_Effect[W] for Effect[[M[_], A] => Writer[W, M, A]] {
       Censor(mod, scope2, wtf2)
   }
 }
+
+def tell[H[_[_], _], M[_], W](w : W) given (evM: Member[Writer.Ap1[W], H], evC: Carrier[H, M]) : M[Unit] =
+  send[Writer.Ap1[W], H, M, Unit](Tell(w, evC.theMonad.pure(())))
+
+def listen[H[_[_], _], M[_], W, A](scope : M[A]) given (evM: Member[Writer.Ap1[W], H], evC: Carrier[H, M]) : M[(W, A)] =
+  send[Writer.Ap1[W], H, M, (W, A)](Listen(scope, w => a => evC.theMonad.pure((w, a))))
+
+def listens[H[_[_], _], M[_], W, A, B](f : W => B)(scope : M[A]) given (evM: Member[Writer.Ap1[W], H], evC: Carrier[H, M]) : M[(B, A)] =
+  send[Writer.Ap1[W], H, M, (B, A)](Listen(scope, w => a => evC.theMonad.pure((f(w), a))))
+
+def censor[H[_[_], _], M[_], W, A](f : W => W)(scope : M[A]) given (evM: Member[Writer.Ap1[W], H], evC: Carrier[H, M]) : M[A] =
+  send[Writer.Ap1[W], H, M, A](Censor(f, scope, evC.theMonad.pure(_)))
