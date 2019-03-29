@@ -7,8 +7,13 @@ sealed trait Error[E, M[_], A]
 case class Throw[E, M[_], A](wtf: E) extends Error[E, M, A]
 case class Catch[E, M[_], A, B](scope: M[B], catcher: E => M[B], wtf: B => A) extends Error[E, M, A]
 
+object Error {
+  type Ap1[E] = [M[_], A] => Error[E, M, A]
+  type Ap2[E, M[_]] = [A] => Error[E, M, A]
+}
 
-implied Error_Effect[E] for Effect[[M[_], A] => Error[E, M, A]] {
+
+implied Error_Effect[E] for Effect[Error.Ap1[E]] {
   private type H = ThisHFunctor
 
   def (h: H[M, A]) fmap[M[_], A, B](f: A => B): H[M, B] = h match {
@@ -33,3 +38,10 @@ implied Error_Effect[E] for Effect[[M[_], A] => Error[E, M, A]] {
       Catch(scope2, catcher2, wtf2)
   }
 }
+
+
+def throwError[H[_[_], _], M[_], E](e : E) given (evM: Member[Error.Ap1[E], H], evC: Carrier[H, M]): M[Nothing] =
+  send[Error.Ap1[E], H, M, Nothing](Throw(e))
+
+def catchError[H[_[_], _], M[_], E, A](scope : M[A], catcher : E => M[A]) given (evM: Member[Error.Ap1[E], H], evC: Carrier[H, M]): M[A] =
+  send[Error.Ap1[E], H, M, A](Catch(scope, catcher, evC.theMonad.pure(_)))
