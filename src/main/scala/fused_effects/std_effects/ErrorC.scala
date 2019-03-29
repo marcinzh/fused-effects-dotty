@@ -5,6 +5,10 @@ import mwords._
 
 case class ErrorC[E, M[_], A](run: M[Either[E, A]])
 
+object ErrorC {
+  type Ap1[E] = [M[_], A] => ErrorC[E, M, A]
+  type Ap2[E, M[_]] = [A] => ErrorC[E, M, A]
+}
 
 implied ErrorC_Monad[M[_] : Monad, E] for Monad[[A] => ErrorC[E, M, A]] {
   private type F = ThisMonad
@@ -20,8 +24,8 @@ implied ErrorC_Monad[M[_] : Monad, E] for Monad[[A] => ErrorC[E, M, A]] {
 
 
 implied Error_Carrier[H0[_[_], _] : Effect, M0[_], E] given (otherCarrier: Carrier[H0, M0]) for Carrier[
-  ([M[_], A] => Error[E, M, A]) :+: H0,
-  [A] => ErrorC[E, M0, A]
+  Error.Ap1[E] :+: H0,
+  ErrorC.Ap2[E, M0]
 ] {
   private type H = ThisH
   private type M = ThisM

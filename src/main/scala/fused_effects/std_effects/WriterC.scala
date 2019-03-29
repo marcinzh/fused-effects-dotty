@@ -6,14 +6,14 @@ import mwords._
 case class WriterC[W, M[_], A](run: StateC[W, M, A])
 
 object WriterC {
-  type Ap1[S] = [M[_], A] => WriterC[S, M, A]
-  type Ap2[S, M[_]] = [A] => WriterC[S, M, A]
+  type Ap1[W] = [M[_], A] => WriterC[W, M, A]
+  type Ap2[W, M[_]] = [A] => WriterC[W, M, A]
 }
 
 
 implied WriterC_Carrier[H0[_[_], _] : Effect, M0[_], W: Monoid] given (otherCarrier: Carrier[H0, M0]) for Carrier[
-  ([M[_], A] => Writer[W, M, A]) :+: H0,
-  [A] => WriterC[W, M0, A]
+  Writer.Ap1[W] :+: H0,
+  WriterC.Ap2[W, M0]
 ] {
   private type H = ThisH
   private type M = ThisM

@@ -5,6 +5,11 @@ import mwords._
 
 case class ReaderC[E, M[_], A](run: E => M[A])
 
+object ReaderC {
+  type Ap1[E] = [M[_], A] => ReaderC[E, M, A]
+  type Ap2[E, M[_]] = [A] => ReaderC[E, M, A]
+}
+
 
 implied ReaderC_Monad[M[_] : Monad, E] for Monad[[A] => ReaderC[E, M, A]] {
   private type F = ThisMonad
@@ -16,8 +21,8 @@ implied ReaderC_Monad[M[_] : Monad, E] for Monad[[A] => ReaderC[E, M, A]] {
 
 
 implied Reader_Carrier[H0[_[_], _], M0[_], E] given (otherCarrier: Carrier[H0, M0]) for Carrier[
-  ([M[_], A] => Reader[E, M, A]) :+: H0,
-  [A] => ReaderC[E, M0, A]
+  Reader.Ap1[E] :+: H0,
+  ReaderC.Ap2[E, M0]
 ] {
   private type H = ThisH
   private type M = ThisM
