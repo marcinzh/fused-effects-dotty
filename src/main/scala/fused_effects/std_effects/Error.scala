@@ -40,8 +40,8 @@ implied Error_Effect[E] for Effect[Error.Ap1[E]] {
 }
 
 
-def throwError[H[_[_], _], M[_], E](e : E) given (evM: Member[Error.Ap1[E], H], evC: Carrier[H, M]): M[Nothing] =
+def throwError[H[_[_], _], M[_], E](e: E) given (evM: Member[Error.Ap1[E], H], evC: Carrier[H, M]): M[Nothing] =
   send[Error.Ap1[E], H, M, Nothing](Throw(e))
 
-def catchError[H[_[_], _], M[_], E, A](scope : M[A], catcher : E => M[A]) given (evM: Member[Error.Ap1[E], H], evC: Carrier[H, M]): M[A] =
+def catchError[H[_[_], _], M[_], E, A](scope: M[A], catcher: E => M[A]) given (evM: Member[Error.Ap1[E], H], evC: Carrier[H, M]): M[A] =
   send[Error.Ap1[E], H, M, A](Catch(scope, catcher, evC.theMonad.pure(_)))
