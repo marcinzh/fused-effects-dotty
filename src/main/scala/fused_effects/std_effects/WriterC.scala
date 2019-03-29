@@ -40,7 +40,7 @@ implied WriterC_Carrier[H0[_[_], _] : Effect, M0[_], W: Monoid] given (otherCarr
         w1 <- get
         // _ <- modify(w0 |@| (_: W))
         _ <- put(w0 |@| w1)
-        x <- wtf(w1)(a).run
+        x <- wtf((w1, a)).run
       } yield x
     }
     case Sum.L(Censor(mod, scope, wtf)) => WriterC {

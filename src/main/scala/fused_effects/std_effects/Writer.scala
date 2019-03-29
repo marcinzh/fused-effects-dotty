@@ -5,7 +5,7 @@ import mwords._
 
 sealed trait Writer[W, M[_], A]
 case class Tell[W, M[_], A](stuff: W, wtf: A) extends Writer[W, M, A]
-case class Listen[W, M[_], A, B](scope: M[B], wtf: W => B => A) extends Writer[W, M, A]
+case class Listen[W, M[_], A, B](scope: M[B], wtf: ((W, B)) => A) extends Writer[W, M, A]
 case class Censor[W, M[_], A, B](mod: W => W, scope: M[B], wtf: B => A) extends Writer[W, M, A]
 
 object Writer {
@@ -18,13 +18,15 @@ def tell[H[_[_], _], M[_], W](w: W) given (evM: Member[Writer.Ap1[W], H], evC: C
   send[Writer.Ap1[W]](Tell(w, evC.theMonad.pure(())))
 
 def listen[H[_[_], _], M[_], W, A](scope: M[A]) given (evM: Member[Writer.Ap1[W], H], evC: Carrier[H, M]): M[(W, A)] =
-  send[Writer.Ap1[W]](Listen(scope, w => a => evC.theMonad.pure((w, a))))
-
-def listens[H[_[_], _], M[_], W, A, B](f: W => B)(scope: M[A]) given (evM: Member[Writer.Ap1[W], H], evC: Carrier[H, M]): M[(B, A)] =
-  send[Writer.Ap1[W]](Listen(scope, w => a => evC.theMonad.pure((f(w), a))))
+  send[Writer.Ap1[W]](Listen(scope, evC.theMonad.pure(_)))
 
 def censor[H[_[_], _], M[_], W, A](f: W => W)(scope: M[A]) given (evM: Member[Writer.Ap1[W], H], evC: Carrier[H, M]): M[A] =
   send[Writer.Ap1[W]](Censor(f, scope, evC.theMonad.pure(_)))
+
+def listens[H[_[_], _], M[_], W, A, B](f: W => B)(scope: M[A]) given (evM: Member[Writer.Ap1[W], H], evC: Carrier[H, M]): M[(B, A)] = {
+  import evC.theMonad
+  listen(scope).map { case (w, a) => (f(w), a) }
+}
 
 
 implied Writer_Effect[W] for Effect[[M[_], A] => Writer[W, M, A]] {
@@ -32,7 +34,7 @@ implied Writer_Effect[W] for Effect[[M[_], A] => Writer[W, M, A]] {
 
   def (h: H[M, A]) fmap[M[_], A, B](f: A => B): H[M, B] = h match {
     case Tell(w, wtf) => Tell(w, f(wtf))
-    case Listen(scope, wtf) => Listen(scope, w => wtf(w).andThen(f))
+    case Listen(scope, wtf) => Listen(scope, wtf.andThen(f))
     case Censor(mod, scope, wtf) => Censor(mod, scope, wtf.andThen(f))
   }
 
@@ -49,7 +51,10 @@ implied Writer_Effect[W] for Effect[[M[_], A] => Writer[W, M, A]] {
     case Tell(w, wtf) => Tell(w, ff(fu.mapConst(wtf)))
     case Listen(scope: M[tB], wtf) =>
       val scope2 = ff(fu.mapConst(scope))
-      val wtf2 = (w: W) => (fb: F[tB]) => ff(fb.map(wtf(w)))
+      val wtf2 = (w_fb: (W, F[tB])) => {
+        val (w, fb) = w_fb
+        ff(fb.map(b => wtf((w, b))))
+      }
       Listen(scope2, wtf2)
     case Censor(mod, scope: M[tB], wtf) =>
       val scope2 = ff(fu.mapConst(scope))
