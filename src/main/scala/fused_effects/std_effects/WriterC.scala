@@ -23,7 +23,7 @@ implied WriterC_Carrier[H0[_[_], _] : Effect, M0[_], W: Monoid] given (otherCarr
   implicit def theMonad: Monad[M] = the[Monad[M]]
 
   private type WrappedCarrier = Carrier[State.Ap1[W] :+: H0, StateC.Ap2[W, M0]]
-  private implicit def theWrappedCarrier : WrappedCarrier = the[WrappedCarrier]
+  private implicit def theWrappedCarrier: WrappedCarrier = the[WrappedCarrier]
 
   def eff[A](h: H[M, M[A]]): M[A] = h match {
     case Sum.L(Tell(w, wtf)) => WriterC {

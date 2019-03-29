@@ -29,13 +29,12 @@ implied Reader_Carrier[H0[_[_], _], M0[_], E] given (otherCarrier: Carrier[H0, M
   def eff[A](h: H[M, M[A]]): M[A] = h match {
     case Sum.L(Ask(wtf)) => ReaderC(e => wtf(e).run(e))
     case Sum.L(Local(mod, scope: ReaderC[E, M0, tB], wtf)) => ReaderC[E, M0, tB](e => scope.run(mod(e))).flatMap(wtf)
-    case Sum.R(other) =>
-      ReaderC { e =>
-        val ff = new ~>[[X] => ReaderC[E, M0, X], M0] {
-          def apply[A](carr: ReaderC[E, M0, A]) = carr.run(e)
-        }
-        val h0 = other.handlePure(ff)
-        otherCarrier.eff(h0)
+    case Sum.R(other) => ReaderC { e =>
+      val ff = new ~>[[X] => ReaderC[E, M0, X], M0] {
+        def apply[A](carr: ReaderC[E, M0, A]) = carr.run(e)
       }
+      val h0 = other.handlePure(ff)
+      otherCarrier.eff(h0)
+    }
   }
 }

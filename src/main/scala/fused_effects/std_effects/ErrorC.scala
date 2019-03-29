@@ -40,17 +40,16 @@ implied Error_Carrier[H0[_[_], _] : Effect, M0[_], E] given (otherCarrier: Carri
           case Left(e) => Monad[M0].pure(Left(e))
         }
       })
-    case Sum.R(other) =>
-      ErrorC {
-        val ff = new ~>[[X] => Either[E, ErrorC[E, M0, X]], [X] => M0[Either[E, X]]] {
-          def apply[A](e_carr: Either[E, ErrorC[E, M0, A]]) = e_carr match {
-            case Right(carr) => carr.run
-            case Left(e) => Monad[M0].pure(Left(e))
-          }
+    case Sum.R(other) => ErrorC {
+      val ff = new ~>[[X] => Either[E, ErrorC[E, M0, X]], [X] => M0[Either[E, X]]] {
+        def apply[A](e_carr: Either[E, ErrorC[E, M0, A]]) = e_carr match {
+          case Right(carr) => carr.run
+          case Left(e) => Monad[M0].pure(Left(e))
         }
-        val fu: Either[E, Unit] = Right(())
-        val h0 = Effect[H0].handle(other)(fu, ff)
-        otherCarrier.eff(h0)
       }
+      val fu: Either[E, Unit] = Right(())
+      val h0 = Effect[H0].handle(other)(fu, ff)
+      otherCarrier.eff(h0)
+    }
   }
 }

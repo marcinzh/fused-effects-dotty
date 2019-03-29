@@ -39,16 +39,15 @@ implied StateC_Carrier[H0[_[_], _] : Effect, M0[_], S] given (otherCarrier: Carr
   def eff[A](h: H[M, M[A]]): M[A] = h match {
     case Sum.L(Get(wtf)) => StateC(s => wtf(s).run(s))
     case Sum.L(Put(s, wtf)) => StateC(_ => wtf.run(s))
-    case Sum.R(other) =>
-      StateC { s0 =>
-        val ff = new ~>[[X] => (S, StateC[S, M0, X]), [X] => M0[(S, X)]] {
-          def apply[A](s_carr: (S, StateC[S, M0, A])) = {
-            val (s, carr) = s_carr
-            carr.run(s)
-          }
+    case Sum.R(other) => StateC { s0 =>
+      val ff = new ~>[[X] => (S, StateC[S, M0, X]), [X] => M0[(S, X)]] {
+        def apply[A](s_carr: (S, StateC[S, M0, A])) = {
+          val (s, carr) = s_carr
+          carr.run(s)
         }
-        val h0 = the[Effect[H0]].handle(other)((s0, ()), ff)
-        otherCarrier.eff(h0)
       }
+      val h0 = the[Effect[H0]].handle(other)((s0, ()), ff)
+      otherCarrier.eff(h0)
+    }
   }
 }
