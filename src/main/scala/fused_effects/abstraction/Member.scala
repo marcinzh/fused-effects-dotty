@@ -45,10 +45,3 @@ object Member extends MemberLow2 {
     }
   }
 }
-
-def send[H[_[_], _]] = new Send2Apply[H]
-
-class Send2Apply[H[_[_], _]] {
-  def apply[HH[_[_], _], M[_], A](h: H[M, M[A]]) given (evM: Member[H, HH], evC: Carrier[HH, M]): M[A] =
-    evC.eff(evM.inj(h))
-}
